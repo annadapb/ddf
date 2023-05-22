@@ -83,8 +83,8 @@ class DDFDataProcess(DataLoader):
         t1 = torch.min(torch.tensor([tx1, ty1, tz1]))
 
 
-        print(center+t1*direction, )
-        print(center+t0*direction, )
+        print(center+t1*direction,)
+        print(center+t0*direction,)
 
         return t0, t1
 
@@ -131,42 +131,42 @@ class DDFDataProcess(DataLoader):
         pyplot.scatter(xy[:, 0], xy[:, 1],)
         pyplot.savefig('samples.jpg')
 
-    def intersect_(self, ray_ori, ray_dir, i):
+    def intersect(self, ray_orig, ray_dir, idx, EPS=1e-5):
         # Moller-Trumbore Algorithm
         EPS = 1e-5
-        face = self._face[idx]
-        v0 = self._vert[face[0]]
-        v1 = self._vert[face[1]]
-        v2 = self._vert[face[2]]
+        face = self.face[idx]
+        v0, v1, v2 = self.vert[face]
 
         E1 = v1-v0
         E2 = v2-v0
-        D = ray.direction
-        T = ray.origin-v0
-        P = cross(D, E2)
-        Q = cross(T, E1)
+        D = ray_dir
+        T = ray_orig-v0
+        P = torch.cross(D, E2)
+        Q = torch.cross(T, E1)
 
-        d = dot(P, E1)
+        d = torch.dot(P, E1)
         is_hit = False if abs(d)<EPS else True
 
         c = 1./d
-        t = c*dot(Q, E2)
-        is_hit = True if is_hit and t>0. else False
+        t = c*torch.dot(Q, E2)
+        return t
 
+        is_hit = True if is_hit and t>0. else False
         u = c*dot(P, T)
         is_hit = True if is_hit and 0.<u<1. else False
-
         v = c*dot(Q, D)
         is_hit = True if is_hit and 0.<v and u+v<=1 else False
-
         hit_point = ray.at(t)
         N = cross(E1, E2)
-
         return is_hit, hit_point, N, t
 
-    def moller_trombore(self, ray_o, ray_d, i, eps=1e-5):
-        x = torch.rand(1)
-        return (True,x) if x<.05 else (False,0.)
+    def moller_trombore(self, ray_o, ray_d,):
+        t = 20
+        # for f in range(len(self.face)):
+        for f in range(100):
+            root = self.intersect(ray_o, ray_d, f)
+            if root>=0 and root<t: t=root
+        return t
 
     def face_intersect(self, p0, p1):
         print("end points", p0, p1)
@@ -191,26 +191,24 @@ class DDFDataProcess(DataLoader):
                     torch.cos(th[0])*torch.sin(th[1]), 
                     torch.sin(th[0])*torch.sin(th[1]),
                     torch.cos(th[1])], device=dev,)
-                t0, t1 = self.bbox(orig, d )
+                # t0, t1 = self.bbox(orig, d )
 
                 # points = self.bbox_samples(orig, torch.tensor([
                 #     torch.cos(th[0])*torch.sin(th[1]), 
                 #     torch.sin(th[0])*torch.sin(th[1]),
                 #     torch.cos(th[1])], device=dev,), n)
                 # faces = self.face_intersect( orig+t0*d, orig+t1*d, )
-                #
-
                 # print("bbox", orig+t0*d, t1)
 
-                n0 = torch.linspace(0, t0, n)
-                n1 = torch.linspace(0, t1, n)
+                t = self.moller_trombore(orig, d)
+                step = torch.linspace(0, t, n).to(dev)
+                for i in step:
+                    dataset.append(torch.hstack((orig+d*t*i, -th, t*i)))
+                # torch.hstack(orig, n*d, 
 
-                # print(n0, n1, sep='\n')
 
 
-                break
-            break
-        exit()
+        return torch.stack(dataset)
 
         '''
                 for i in range(n):
@@ -268,8 +266,8 @@ def main(samples_per_face,
 if __name__ == '__main__':
     kw = {
        'samples_per_face': 5,
-       'samples_per_hemi': 5,
-       'samples_on_ray'  : 5,
+       'samples_per_hemi': 30,
+       'samples_on_ray'  : 50,
        'input' : 'bunny.obj',
        'output': 'bunny.npz',
     }

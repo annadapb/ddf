@@ -3,7 +3,7 @@ import meshio
 import torch
 from torch.utils.data import DataLoader
 import numpy
-import click
+# import click
 
 dev = 'cuda'
 
@@ -62,12 +62,6 @@ class DDFDataProcess(DataLoader):
             samples.append(q)
         return torch.vstack(samples)
 
-    def sample_hemisphere(self, n):
-        samples = list()
-        for i in range(n):
-            dir = torch.tensor([torch.pi, torch.pi*2.],).to(dev)*torch.rand(2).to(dev)
-            samples.append(dir)
-        return torch.vstack(samples)
 
     def bbox(self, center, direction): #, n):
         # this is not correct
@@ -274,3 +268,10 @@ if __name__ == '__main__':
     main(**kw)
     pass
 
+
+def sample_hemisphere(n):
+    samples = list()
+    for i in range(n):
+        dir = torch.tensor([torch.pi, torch.pi*2.],).to(dev)*torch.rand(2).to(dev)
+        samples.append(dir)
+    return torch.vstack(samples)

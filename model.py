@@ -1,7 +1,7 @@
 import torch
 from torch import nn
-from torch import func
-# from process_mesh import sample_hemisphere
+# from torch import func
+from process_mesh import sample_hemisphere
 
 
 class MLP(nn.Module):
@@ -32,6 +32,8 @@ class MLP(nn.Module):
 
     def trace(self, pos, dir):
         # x = func.vmap(torch.hstack, in_dims=(None, 0))(pos, dir)
+        # print(pos.shape)
+        # print(dir.shape)
         x = torch.stack([torch.hstack([
             pos,
             # Cartesian to polar conversion next

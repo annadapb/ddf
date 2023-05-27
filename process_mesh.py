@@ -3,7 +3,7 @@ import meshio
 import torch
 from torch.utils.data import DataLoader
 import numpy
-import click
+# import click
 
 dev = 'cpu'
 
@@ -59,12 +59,6 @@ class DDFDataProcess(DataLoader):
             samples.append(q)
         return torch.vstack(samples)
 
-    def sample_hemisphere(self, n):
-        samples = list()
-        for i in range(n):
-            dir = torch.tensor([torch.pi, torch.pi*2.],).to(dev)*torch.rand(2).to(dev)
-            samples.append(dir)
-        return torch.vstack(samples)
 
     def intersect(self, ray_orig, ray_dir, idx, EPS=1e-5):
         # Moller-Trumbore Algorithm
@@ -158,3 +152,10 @@ if __name__ == '__main__':
     main(**kw)
     pass
 
+
+def sample_hemisphere(n):
+    samples = list()
+    for i in range(n):
+        dir = torch.tensor([torch.pi, torch.pi*2.],).to(dev)*torch.rand(2).to(dev)
+        samples.append(dir)
+    return torch.vstack(samples)

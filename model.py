@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from torch import func
-from process_mesh import sample_hemisphere
+# from process_mesh import sample_hemisphere
 
 
 class MLP(nn.Module):
@@ -55,14 +55,14 @@ class MLP(nn.Module):
             x = L(x)
         return x
 
-    def grad(self, pos):
-        dir = sample_hemisphere(pos.shape[0])
-        x = torch.hstack((pos, dir))
-        for L in self.layers:
-            x = L(x)
-        print(pos.grad)
-        exit()
-        return x.grad
+    # def grad(self, pos):
+    #     dir = sample_hemisphere(pos.shape[0])
+    #     x = torch.hstack((pos, dir))
+    #     for L in self.layers:
+    #         x = L(x)
+    #     print(pos.grad)
+    #     exit()
+    #     return x.grad
 
 
 

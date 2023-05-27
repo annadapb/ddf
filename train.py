@@ -37,7 +37,7 @@ loss_fn = ClampLoss()
 # loss_fn = torch.nn.MSELoss()
 
 data_len = len(ddfload)
-epochs = 10000
+epochs = 100
 
 loss_data = list()
 
@@ -45,8 +45,19 @@ print("Model: ", ddf_model)
 print("Loss function: ", loss_fn)
 print("Optimizer: ", optim)
 
+def plot():
+    from matplotlib import pyplot
+    pyplot.style.use('bmh')
+
+    pyplot.plot(loss_data)
+    pyplot.xlabel('No. of iteration')
+    pyplot.ylabel('Loss')
+    # pyplot.title('Loss v. Iteration for DDF')
+    pyplot.savefig('loss.png')
+
 try:
     for ep in range(epochs):
+        count = 0
         for point, dir, val in ddfload:
             pred = ddf_model(point, dir)
             loss = loss_fn(pred, val)
@@ -58,17 +69,13 @@ try:
             print("[%6.2lf%%] Epoch %3d: Loss = %3.06lf"%
                 ((1+count)*100./data_len, ep, loss),
                 flush=True,end='\r')
+            count += 1
 
         loss_data.append(loss.item())
         torch.save(ddf_model.state_dict(), './weights/%08d.pt'%ep)
         torch.save(ddf_model.state_dict(), './weights/best_model.pt')
         print(end='\n')
-except KeyboardInterrupt:
-    from matplotlib import pyplot
-    pyplot.style.use('bmh')
+        plot()
 
-    pyplot.plot(loss_data)
-    pyplot.xlabel('No. of iteration')
-    pyplot.ylabel('Loss')
-    # pyplot.title('Loss v. Iteration for DDF')
-    pyplot.savefig('loss.png')
+except KeyboardInterrupt:
+    plot()

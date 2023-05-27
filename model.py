@@ -31,9 +31,8 @@ class MLP(nn.Module):
 
 
     def trace(self, pos, dir):
-        # x = func.vmap(torch.hstack, in_dims=(None, 0))(pos, dir)
-        # print(pos.shape)
-        # print(dir.shape)
+        ''' pos: tensor.Size([3])
+            dir: tensor.Size([n, 3])'''
         x = torch.stack([torch.hstack([
             pos,
             # Cartesian to polar conversion next
@@ -80,5 +79,9 @@ class MLP(nn.Module):
 
 if __name__=='__main__':
     x = torch.randn(10, 5)
-    y = MLP()(x)
-    print(y)
+    model = MLP()
+    pos = torch.randn(3);
+    dir = torch.randn(100, 3);
+    z = model.trace(pos, dir)
+    print(z)
+

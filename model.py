@@ -33,6 +33,7 @@ class MLP(nn.Module):
     def trace(self, pos, dir):
         ''' pos: tensor.Size([3])
             dir: tensor.Size([n, 3])'''
+        pos = pos.squeeze()
         x = torch.stack([torch.hstack([
             pos,
             # Cartesian to polar conversion next

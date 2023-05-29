@@ -5,6 +5,10 @@ from camera import Camera
 from model import MLP
 import torch
 
+@drjit.wrap_ad(source="drjit", target="torch")
+def nn_wrap_ad(pos, dir):
+    return model.trace(pos, dir)
+
 def hitSphere(center, radius, cam):
     oc = cam.origin - center
     a = drjit.dot(cam.dir, cam.dir)
@@ -25,25 +29,14 @@ def initCamera():
 def render(model):
     # Initialize camera
     cam = initCamera()
-    # pixelColor = Array3f(1, 1, 0)
-    # pixelColor[hitSphere(Array3f(0, 0, -1), 0.5, cam)] = Array3f(1, 0, 0)
-    # image = drjit.ravel(pixelColor)
     origin = TensorXf(drjit.ravel(cam.origin), shape=drjit.shape(cam.origin))
-    # print(origin.torch())
-    # print(cam.origin.torch())
-
     cam_dir = drjit.normalize(cam.dir)
-    dir = TensorXf(drjit.ravel(cam_dir), shape=[imgW * imgH * 3, 1])
-    # print(dir.torch())
-    # print(cam_dir.torch())
-
-    # print(origin, dir)
-    model.trace(origin.torch(), dir.torch())
-    # model.trace(cam.origin, cam_dir)
+    dir = TensorXf(drjit.ravel(cam_dir), shape=[imgW * imgH, 3])
+    
+    t = nn_wrap_ad(origin, dir)
+    point = drjit.fma(dir, t, origin)
+    print(point)
     exit()
-
-    pixbuf = TensorXf(image, shape=(imgH, imgW, 3))
-    return pixbuf
 
 
 # Image

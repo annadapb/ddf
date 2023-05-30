@@ -6,8 +6,12 @@ from model import MLP
 import torch
 
 @drjit.wrap_ad(source="drjit", target="torch")
-def nn_wrap_ad(pos, dir):
+def nn_wrap_ad_trace(pos, dir):
     return model.trace(pos, dir)
+
+@drjit.wrap_ad(source="drjit", target="torch")
+def nn_wrap_ad_grad(pos):
+    return model.grad(pos)
 
 def hitSphere(center, radius, cam):
     oc = cam.origin - center
@@ -33,9 +37,9 @@ def render(model):
     cam_dir = drjit.normalize(cam.dir)
     dir = TensorXf(drjit.ravel(cam_dir), shape=[imgW * imgH, 3])
     
-    t = nn_wrap_ad(origin, dir)
+    t = nn_wrap_ad_trace(origin, dir)
     point = drjit.fma(dir, t, origin)
-    print(point)
+    grad = nn_wrap_ad_grad(point)
     exit()
 
 

@@ -7,8 +7,7 @@ class Camera:
                  vup, 
                  vFov, 
                  aspectRatio,
-                 x,
-                 y):
+                 ):
         theta = self.degreesToRadians(vFov)
         h = drjit.tan(theta/2)
         viewportHeight = 2.0 * h
@@ -22,7 +21,7 @@ class Camera:
         self.horizontal = viewportWidth * u
         self.vertical = viewportHeight * v
         self.lowerLeftCorner = self.origin - self.horizontal/2 - self.vertical/2 - w
-        self.dir = self.lowerLeftCorner + x*self.horizontal + y*self.vertical - self.origin
+        # self.dir = self.lowerLeftCorner + x*self.horizontal + y*self.vertical - self.origin
 
         # self.origin = Array3f(0., 0., 0.)
         # self.horizontal = Array3f(viewportWidth, 0., 0.)
@@ -31,3 +30,6 @@ class Camera:
 
     def degreesToRadians(self, degrees):
         return degrees * drjit.pi / 180.0
+    
+    def getRay(self, u, v):
+        return self.lowerLeftCorner + u*self.horizontal + v*self.vertical - self.origin

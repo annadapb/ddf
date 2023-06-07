@@ -35,7 +35,8 @@ def render():
     
     noise = numpy.random.uniform(0, 1, size=(800, 800, 3))
     sample = drjit.unravel(Array3f, Float(noise.ravel()))
-    cam.dir = cam.dir + sample
+    cam.dir = cam.dir + .01*sample
+    # print(cam.dir[1], sample[1], sep='\n'); exit()
     pixelColor[hitSphere(Array3f(0, 0, -1), 0.5, cam)] = Array3f(1, 0, 0)
     
 

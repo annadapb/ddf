@@ -2,7 +2,7 @@ import drjit
 from drjit.cuda.ad import UInt32, Array3f, Loop, Float, TensorXf
 from camera import Camera
 from imageio import imwrite
-from random import random
+import numpy
 
 def hitSphere(center, radius, cam):
     oc = cam.origin - center
@@ -32,21 +32,14 @@ def initCamera():
 def render():
     cam = initCamera()
     pixelColor = Array3f(0, 0, 0)
-    sample = UInt32(0)
+    
+    noise = numpy.random.uniform(0, 1, size=(800, 800, 3))
+    sample = drjit.unravel(Array3f, Float(noise.ravel()))
+    cam.dir = cam.dir + sample
+    pixelColor[hitSphere(Array3f(0, 0, -1), 0.5, cam)] = Array3f(1, 0, 0)
+    
 
-    loop = Loop("Anti-aliasing", lambda: (sample))
-    while loop(sample < samplesPerPixel):
-        color = Array3f(0, 0, 0)
-        u = (x + random()) / (imgW - 1)
-        v = (y + random()) / (imgH - 1)
-
-        cam.dir = cam.getRay(u, v)
-        # color[hitSphere(Array3f(0, -100.5, -1), 100, cam)] = Array3f(1, 1, 0)
-        color[hitSphere(Array3f(0, 0, -1), 0.5, cam)] = Array3f(1, 0, 0)
-        pixelColor += color
-        sample += 1
-
-    pixelColor = writeColor(pixelColor)
+    # pixelColor = writeColor(pixelColor)
     img = drjit.ravel(pixelColor)
 
     img_t = TensorXf(img, shape=(imgH, imgW, 3))

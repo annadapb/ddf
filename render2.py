@@ -25,7 +25,7 @@ def initCamera():
     vUp = Array3f(0, 1, 0)
     vFov = 10
 
-    cam = Camera(lookFrom, lookAt, vUp, vFov, aspectRatio)
+    cam = Camera(lookFrom, lookAt, vUp, vFov, aspectRatio, x, y)
     return cam
 
 

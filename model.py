@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 # from torch import func
-from process_mesh import sample_hemisphere
 
 
 class MLP(nn.Module):
@@ -44,15 +43,7 @@ class MLP(nn.Module):
             x = L(x)
         return x
 
-    def forward(self, pos, dir):
-        # x = func.vmap(torch.hstack, in_dims=(None, 0))(pos, dir)
-        # x = torch.stack([torch.hstack([
-        #     pos[i],
-        #     # Cartesian to polar conversion next
-        #     torch.atan(dir[i, 1]/dir[i, 0]),
-        #     torch.acos(dir[i, 2])
-        #     ]) for i in range(len(dir))])
-        x = torch.hstack((pos, dir))
+    def forward(self, x):
         for L in self.layers:
             x = L(x)
         return x
@@ -78,10 +69,8 @@ class MLP(nn.Module):
 
 
 if __name__=='__main__':
-    x = torch.randn(10, 5)
     model = MLP()
-    pos = torch.randn(3);
-    dir = torch.randn(100, 3);
-    z = model.trace(pos, dir)
-    print(z)
+    x = torch.randn(10, 5)
+    z = model(x)
+    print(z.ravel())
 

@@ -7,19 +7,18 @@ dev = 'cuda'
 
 class DDFDataset(Dataset):
     def __init__(self,):
-        data_load = numpy.load('./bunny.npz')
+        data_load = numpy.load('./sampling/bunny.random.npz')
         self.data = torch.tensor(data_load['arr_0'], device=dev)
-        self.points, self.dir, self.val = torch.hsplit(self.data, [3,5])
+        self.points, self.val = torch.hsplit(self.data, [5])
 
     def __len__(self,):
         return self.data.size()[0]
 
     def __getitem__(self, idx):
-        return self.points[idx], self.dir[idx], self.val[idx]
+        return self.points[idx], self.val[idx]
 
 dataset = DDFDataset()
 ddfload = DataLoader(dataset, batch_size=1024, shuffle=True)
-
 
 class ClampLoss(torch.nn.Module):
     def __init__(self, eps = .1):
@@ -37,7 +36,7 @@ loss_fn = ClampLoss()
 # loss_fn = torch.nn.MSELoss()
 
 data_len = len(ddfload)
-epochs = 100
+epochs = 50_000
 
 loss_data = list()
 
@@ -58,8 +57,8 @@ def plot():
 try:
     for ep in range(epochs):
         count = 0
-        for point, dir, val in ddfload:
-            pred = ddf_model(point, dir)
+        for point, val in ddfload:
+            pred = ddf_model(point)
             loss = loss_fn(pred, val)
 
             ddf_model.zero_grad()
@@ -72,10 +71,9 @@ try:
             count += 1
 
         loss_data.append(loss.item())
-        torch.save(ddf_model.state_dict(), './weights/%08d.pt'%ep)
-        torch.save(ddf_model.state_dict(), './weights/best_model.pt')
         print(end='\n')
         plot()
+    torch.save(ddf_model.state_dict(), './weights/best_model.pt')
 
 except KeyboardInterrupt:
     plot()

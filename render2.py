@@ -38,10 +38,11 @@ def render():
 
     sample = drjit.unravel(Array3f, Float(meanNoise.ravel()))
     cam.dir = cam.dir + 0.001 * sample
+    pixelColor[hitSphere(Array3f(0, -100.5, -1), 100, cam)] = Array3f(1, 1, 0)
     pixelColor[hitSphere(Array3f(0, 0, -1), 0.5, cam)] = Array3f(1, 0, 0)
     
     # Comment writeColor() in order to not to get dim image
-    pixelColor = writeColor(pixelColor)
+    # pixelColor = writeColor(pixelColor)
     img = drjit.ravel(pixelColor)
 
     img_t = TensorXf(img, shape=(imgH, imgW, 3))
